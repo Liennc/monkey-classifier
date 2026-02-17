@@ -1,0 +1,5 @@
+outs:
+- md5: 4d470b3d84553abd4a2458d79fd68c85
+  size: 1899902
+  hash: md5
+  path: embeddings.pt

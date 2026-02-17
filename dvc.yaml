@@ -1,0 +1,13 @@
+stages:
+  train:
+    cmd: python train.py
+    deps:
+      - train.py
+      - dataset.dvc
+    params:
+      - epochs
+      - lr
+    outs:
+      - best_model.pth
+    metrics:
+      - metrics.json

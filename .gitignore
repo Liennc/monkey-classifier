@@ -3,3 +3,5 @@ dataset/
 __pycache__/
 /embeddings.pt
 /dataset
+/best_model.pth
+/metrics.json

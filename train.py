@@ -8,14 +8,14 @@ import json
 
 # DEVICE ---------
 device = "cuda" if torch.cuda.is_available() else "cpu"
+print(device)
 
 # PARAMS ---------
 with open("params.yaml") as f:
     params = yaml.safe_load(f)
 
 epochs = params["epochs"]
-lr = params["lr"]
-frozen = params["frozen"]
+lr = float(params["lr"])
 
 # DATASET ---------
 transform = transforms.Compose([
@@ -40,7 +40,7 @@ val_loader = DataLoader(val_data, batch_size=batch_size)
 test_loader = DataLoader(test_data, batch_size=batch_size)
 
 # MODEL ------------
-model = models.resnet18(petrained = True)
+model = models.resnet18(pretrained = True)
 model.fc = nn.Linear(in_features=512, out_features=6)
 model = model.to(device)
 

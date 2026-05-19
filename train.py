@@ -48,18 +48,27 @@ model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
-# TRAIN ------------------------
+# ---------------- TRAIN ------------------------
+
 train_losses = []
+val_losses = []
+
+train_accuracies = []
+val_accuracies = []
 
 for epoch in range(epochs):
 
     print(f"\nEpoch {epoch+1}/{epochs}")
 
+    # -------- TRAIN --------
+
     model.train()
 
-    running_loss = 0.0
+    running_train_loss = 0.0
+    correct_train = 0
+    total_train = 0
 
-    for batch_idx, (images, labels) in enumerate(train_loader):
+    for images, labels in train_loader:
 
         images = images.to(device)
         labels = labels.to(device)
@@ -72,16 +81,57 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
 
-        running_loss += loss.item()
+        running_train_loss += loss.item()
 
-        if batch_idx % 5 == 0:
-            print(f"Batch {batch_idx} | Loss: {loss.item():.4f}")
+        _, predicted = torch.max(outputs, 1)
 
-    epoch_loss = running_loss / len(train_loader)
+        total_train += labels.size(0)
+        correct_train += (predicted == labels).sum().item()
 
-    train_losses.append(epoch_loss)
+    epoch_train_loss = running_train_loss / len(train_loader)
+    epoch_train_acc = 100 * correct_train / total_train
 
-    print(f"Epoch Loss: {epoch_loss:.4f}")
+    train_losses.append(epoch_train_loss)
+    train_accuracies.append(epoch_train_acc)
+
+    # -------- VALIDATION --------
+
+    model.eval()
+
+    running_val_loss = 0.0
+    correct_val = 0
+    total_val = 0
+
+    with torch.no_grad():
+
+        for images, labels in val_loader:
+
+            images = images.to(device)
+            labels = labels.to(device)
+
+            outputs = model(images)
+
+            loss = criterion(outputs, labels)
+
+            running_val_loss += loss.item()
+
+            _, predicted = torch.max(outputs, 1)
+
+            total_val += labels.size(0)
+            correct_val += (predicted == labels).sum().item()
+
+    epoch_val_loss = running_val_loss / len(val_loader)
+    epoch_val_acc = 100 * correct_val / total_val
+
+    val_losses.append(epoch_val_loss)
+    val_accuracies.append(epoch_val_acc)
+
+    print(
+        f"Train Loss: {epoch_train_loss:.4f} | "
+        f"Val Loss: {epoch_val_loss:.4f} | "
+        f"Train Acc: {epoch_train_acc:.2f}% | "
+        f"Val Acc: {epoch_val_acc:.2f}%"
+    )
 
 # TEST ------------------------
 model.eval()
@@ -107,8 +157,38 @@ torch.save(model.state_dict(), "best_model.pth")
 with open("metrics.json", "w") as f:
     json.dump({"test_accuracy": test_accuracy}, f)
 
-plt.plot(train_losses)
+# ---------------- LOSS GRAPH ------------------------
+
+plt.figure(figsize=(8,5))
+
+plt.plot(train_losses, label="Train Loss")
+plt.plot(val_losses, label="Validation Loss")
+
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.title("Training Loss")
+
+plt.title("Training and Validation Loss")
+
+plt.legend()
+
 plt.savefig("loss_plot.png")
+
+plt.close()
+
+# ---------------- ACCURACY GRAPH ------------------------
+
+plt.figure(figsize=(8,5))
+
+plt.plot(train_accuracies, label="Train Accuracy")
+plt.plot(val_accuracies, label="Validation Accuracy")
+
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+
+plt.title("Training and Validation Accuracy")
+
+plt.legend()
+
+plt.savefig("accuracy_plot.png")
+
+plt.close()

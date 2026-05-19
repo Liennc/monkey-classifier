@@ -10,18 +10,18 @@ stages:
       nfiles: 907
     - path: train.py
       hash: md5
-      md5: b680ec84c2aafc1b634f38386f210f21
-      size: 2312
+      md5: 7bc6ca950f1072460f4b37fdb1e3b147
+      size: 2869
     params:
       params.yaml:
-        epochs: 7
+        epochs: 5
         lr: 0.001
     outs:
     - path: best_model.pth
       hash: md5
-      md5: 22fd47c11aa3d545b52ad0cc22fd7f5c
+      md5: f77e65512f51c77c249de36ab6df8dc7
       size: 44796235
     - path: metrics.json
       hash: md5
-      md5: 8ee6efdcc4ca026dbd9404ab64adb45d
-      size: 36
+      md5: 66da5f5307e3f324afd0604aafe4e049
+      size: 37

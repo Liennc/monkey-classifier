@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import models, datasets, transforms
 from torch.utils.data import DataLoader, random_split
+import matplotlib.pyplot as plt
 import yaml
 import json
 
@@ -48,19 +49,39 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=lr)
 
 # TRAIN ------------------------
+train_losses = []
+
 for epoch in range(epochs):
+
+    print(f"\nEpoch {epoch+1}/{epochs}")
+
     model.train()
-    for images, labels in train_loader:
+
+    running_loss = 0.0
+
+    for batch_idx, (images, labels) in enumerate(train_loader):
+
         images = images.to(device)
         labels = labels.to(device)
 
         outputs = model(images)
+
         loss = criterion(outputs, labels)
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
+        running_loss += loss.item()
+
+        if batch_idx % 5 == 0:
+            print(f"Batch {batch_idx} | Loss: {loss.item():.4f}")
+
+    epoch_loss = running_loss / len(train_loader)
+
+    train_losses.append(epoch_loss)
+
+    print(f"Epoch Loss: {epoch_loss:.4f}")
 
 # TEST ------------------------
 model.eval()
@@ -85,3 +106,9 @@ torch.save(model.state_dict(), "best_model.pth")
 
 with open("metrics.json", "w") as f:
     json.dump({"test_accuracy": test_accuracy}, f)
+
+plt.plot(train_losses)
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.title("Training Loss")
+plt.savefig("loss_plot.png")

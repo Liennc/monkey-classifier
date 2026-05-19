@@ -1,0 +1,8 @@
+torch
+torchvision
+streamlit
+faiss-cpu
+pillow
+pyyaml
+dvc
+matplotlib
